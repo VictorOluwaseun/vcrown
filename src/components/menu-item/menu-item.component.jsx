@@ -4,8 +4,6 @@ import { withRouter } from "react-router-dom";
 import "./menu-item.styles.scss";
 
 const MenuItem = ({ title, imageUrl, size, history, linkUrl, match }) => {
- console.log(match);
-
  return (
   <div
    className={`${size} menu-item`}
@@ -14,7 +12,7 @@ const MenuItem = ({ title, imageUrl, size, history, linkUrl, match }) => {
    <div
     className="background-image"
     style={{
-     backgroundImage: `url(${imageUrl})`
+     backgroundImage: `url(${imageUrl})`,
     }}
    />
 
@@ -25,5 +23,5 @@ const MenuItem = ({ title, imageUrl, size, history, linkUrl, match }) => {
   </div>
  );
 };
-
+//by wrapping with withRouter, we now have access to history
 export default withRouter(MenuItem);
