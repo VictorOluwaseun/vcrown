@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Switch } from "react-router-dom";
+import { Route, Switch, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import HomePage from "./pages/homepage/homepage.component";
 import ShopPage from "./pages/shop/shop.component";
@@ -60,18 +60,28 @@ class App extends React.Component {
     <Switch>
      <Route exact path="/" component={HomePage} />
      <Route path="/shop" component={ShopPage} />
-     <Route path="/signin" component={SignInAndSignUpPage} />
+     <Route
+      exact
+      path="/signin"
+      render={() =>
+       this.props.currentUser ? <Redirect to="/" /> : <SignInAndSignUpPage />
+      }
+     />
     </Switch>
    </div>
   );
  }
 }
 
-const mapDispatchToProps = (dispatch) => ({
- setCurrentUser: (user) => dispatch(setCurrentUser()), //What dispatch is, it is a way to know that reducer whenever u passing me, it's gonna be action object I'm gonna pass to the reducer
+const mapStateToProps = ({ user }) => ({
+ currentUser: user.currentUser,
 });
 
-export default connect(null, mapDispatchToProps)(App); //null is passed because app.js doesn't need currentUser
+const mapDispatchToProps = (dispatch) => ({
+ setCurrentUser: (user) => dispatch(setCurrentUser(user)), //What dispatch is, it is a way to know that reducer whenever u r passing me, it's gonna be action object I'm gonna pass to the reducer
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App); //null is passed because app.js doesn't need currentUser
 
 // import React from "react";
 // import { Route, Link } from "react-router-dom";
