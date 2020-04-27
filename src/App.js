@@ -1,49 +1,90 @@
 import React from "react";
-import { Route, Switch } from "react-router-dom";
+import {
+  Route,
+  Switch
+} from "react-router-dom";
 import HomePage from "./pages/homepage/homepage.component";
 import ShopPage from "./pages/shop/shop.component";
 import Header from "./components/header/header.component";
 import SignInAndSignUpPage from "./pages/sign-in-and-sign-up/sign-in-and-sign-up.component";
-import { auth } from "./firebase/firebase.utils";
+import {
+  auth,
+  createUserProfileDocument
+} from "./firebase/firebase.utils";
 
 import "./App.css";
 
 // const Fruits = () => <h1>Fruits</h1>;
 
 class App extends React.Component {
- constructor() {
-  super();
-  this.state = {
-   currentUser: null,
-  };
- }
+  constructor() {
+    super();
+    this.state = {
+      currentUser: null,
+    };
+  }
 
- unsubscribeFromAuth = null;
+  unsubscribeFromAuth = null;
 
- componentDidMount() {
-  this.unsubscribeFromAuth = auth.onAuthStateChanged((user) => {
-   //know more about this. It is an open subcription, there is need to unsubcribe
-   this.setState({ currentUser: user });
-   console.log(user);
-  });
- }
+  componentDidMount() {
+    this.unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
+      //know more about this. It is an open subcription, there is need to unsubcribe
+      //  this.setState({ currentUser: user });
+      //  await
+      if (userAuth) {
+        const userRef = await createUserProfileDocument(userAuth);
 
- componentWillUnmount() {
-  this.unsubscribeFromAuth();
- }
+        userRef.onSnapshot((snapShot) => {
+          this.setState({
+              currentUser: {
+                id: snapShot.id,
+                ...snapShot.data(),
+              },
+            },
+            () => console.log(this.state)
+          );
+        });
+      } else {
+        this.setState({
+          currentUser: userAuth
+        });
+      }
+    });
+  }
 
- render() {
-  return (
-   <div>
-    <Header currentUser={this.state.currentUser} />
-    <Switch>
-     <Route exact path="/" component={HomePage} />
-     <Route path="/shop" component={ShopPage} />
-     <Route path="/signin" component={SignInAndSignUpPage} />
-    </Switch>
-   </div>
-  );
- }
+  componentWillUnmount() {
+    this.unsubscribeFromAuth();
+  }
+
+  render() {
+    return ( <
+      div >
+      <
+      Header currentUser = {
+        this.state.currentUser
+      }
+      /> <
+      Switch >
+      <
+      Route exact path = "/"
+      component = {
+        HomePage
+      }
+      /> <
+      Route path = "/shop"
+      component = {
+        ShopPage
+      }
+      /> <
+      Route path = "/signin"
+      component = {
+        SignInAndSignUpPage
+      }
+      /> < /
+      Switch > <
+      /div>
+    );
+  }
 }
 
 export default App;
