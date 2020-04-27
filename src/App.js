@@ -1,93 +1,77 @@
 import React from "react";
-import {
-  Route,
-  Switch
-} from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
+import { connect } from "react-redux";
 import HomePage from "./pages/homepage/homepage.component";
 import ShopPage from "./pages/shop/shop.component";
 import Header from "./components/header/header.component";
 import SignInAndSignUpPage from "./pages/sign-in-and-sign-up/sign-in-and-sign-up.component";
-import {
-  auth,
-  createUserProfileDocument
-} from "./firebase/firebase.utils";
+import { auth, createUserProfileDocument } from "./firebase/firebase.utils";
+import { setCurrentUser } from "./redux/user/user.actions";
 
 import "./App.css";
 
 // const Fruits = () => <h1>Fruits</h1>;
 
+//  constructor() {
+//   super();
+//   this.state = {
+//    currentUser: null,
+//   };
+//  }
+
 class App extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      currentUser: null,
-    };
-  }
+ unsubscribeFromAuth = null;
 
-  unsubscribeFromAuth = null;
+ componentDidMount() {
+  const { setCurrentUser } = this.props;
+  this.unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
+   //know more about this. It is an open subcription, there is need to unsubcribe
+   //  this.setState({ currentUser: user });
+   //  await
+   if (userAuth) {
+    const userRef = await createUserProfileDocument(userAuth);
 
-  componentDidMount() {
-    this.unsubscribeFromAuth = auth.onAuthStateChanged(async (userAuth) => {
-      //know more about this. It is an open subcription, there is need to unsubcribe
-      //  this.setState({ currentUser: user });
-      //  await
-      if (userAuth) {
-        const userRef = await createUserProfileDocument(userAuth);
-
-        userRef.onSnapshot((snapShot) => {
-          this.setState({
-              currentUser: {
-                id: snapShot.id,
-                ...snapShot.data(),
-              },
-            },
-            () => console.log(this.state)
-          );
-        });
-      } else {
-        this.setState({
-          currentUser: userAuth
-        });
-      }
+    userRef.onSnapshot((snapShot) => {
+     //  this.setState(
+     //  this.props.setCurrentUser(
+     setCurrentUser(
+      {
+       id: snapShot.id,
+       ...snapShot.data(),
+      },
+      () => console.log(this.state)
+     );
     });
-  }
+   } else {
+    setCurrentUser(userAuth);
+   }
+  });
+ }
 
-  componentWillUnmount() {
-    this.unsubscribeFromAuth();
-  }
+ componentWillUnmount() {
+  this.unsubscribeFromAuth();
+ }
 
-  render() {
-    return ( <
-      div >
-      <
-      Header currentUser = {
-        this.state.currentUser
-      }
-      /> <
-      Switch >
-      <
-      Route exact path = "/"
-      component = {
-        HomePage
-      }
-      /> <
-      Route path = "/shop"
-      component = {
-        ShopPage
-      }
-      /> <
-      Route path = "/signin"
-      component = {
-        SignInAndSignUpPage
-      }
-      /> < /
-      Switch > <
-      /div>
-    );
-  }
+ render() {
+  return (
+   <div>
+    {/* <Header currentUser={this.state.currentUser} /> */}
+    <Header />
+    <Switch>
+     <Route exact path="/" component={HomePage} />
+     <Route path="/shop" component={ShopPage} />
+     <Route path="/signin" component={SignInAndSignUpPage} />
+    </Switch>
+   </div>
+  );
+ }
 }
 
-export default App;
+const mapDispatchToProps = (dispatch) => ({
+ setCurrentUser: (user) => dispatch(setCurrentUser()), //What dispatch is, it is a way to know that reducer whenever u passing me, it's gonna be action object I'm gonna pass to the reducer
+});
+
+export default connect(null, mapDispatchToProps)(App); //null is passed because app.js doesn't need currentUser
 
 // import React from "react";
 // import { Route, Link } from "react-router-dom";
