@@ -1,17 +1,33 @@
-import { createSelector } from "reselect";
+import {
+  createSelector
+} from "reselect";
 
 const selectCart = (state) => state.cart; //Input selector
 
 export const selectCartItems = createSelector(
- [selectCart],
- (cart) => cart.cartItems
+  [selectCart],
+  (cart) => cart.cartItems
+);
+
+export const selectCartHidden = createSelector(
+  [selectCart],
+  (cart) => cart.hidden
 );
 
 export const selectCartItemsCount = createSelector(
- [selectCartItems],
- (cartItems) =>
+  [selectCartItems],
+  cartItems =>
   cartItems.reduce(
-   (accumulator, nextValue) => accumulator + nextValue.quantity,
-   0
+    (accumulator, nextValue) => accumulator + nextValue.quantity,
+    0
   )
 );
+
+export const selectCartTotal = createSelector(
+  [selectCartItems],
+  cartItems =>
+  cartItems.reduce(
+    (accumulator, nextValue) => accumulator + nextValue.quantity * nextValue.price,
+    0
+  )
+)
